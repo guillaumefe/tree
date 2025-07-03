@@ -403,8 +403,8 @@ function renderSimulationView(node) {
     breadcrumbContainer.appendChild(item);
   });
 
-  simulationTextElement.textContent = `You are at: "${node.label}"`;
-  announce(`You are at: ${node.label}`);
+  simulationTextElement.textContent = `You have arrived at: "${node.label}"`;
+  announce(`You have arrived at: ${node.label}`);
   simulationOptionsContainer.innerHTML = "";
   selectedSimulationNode = null;
 
