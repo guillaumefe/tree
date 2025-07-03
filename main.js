@@ -198,6 +198,7 @@ function createNode(text) {
   // Edit on right-click or Shift+F10/ContextMenu key
   node.element.oncontextmenu = e => {
     e.preventDefault();
+    e.stopPropagation();
     showEditNodeDialog(node);
   };
   node.element.addEventListener('keydown', e => {
