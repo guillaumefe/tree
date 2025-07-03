@@ -164,6 +164,7 @@ function normalizeLabel(txt) {
 
 /**
  * Create a new tree node element with click/contextmenu handlers
+ * Accessible: node is a button, focusable by keyboard, context menu via keyboard
  */
 function createNode(text) {
   const label = normalizeLabel(text),
@@ -172,30 +173,49 @@ function createNode(text) {
           label,
           children: [],
           parent: null,
-          element: document.createElement("div")
+          element: document.createElement("button")
         };
   node.element.className = "node";
+  node.element.type = "button";
   node.element.textContent = label;
-  // Select on click
-  node.element.onclick = e => {
-    e.stopPropagation();
-    document.querySelectorAll('.node.selected').forEach(el=>el.classList.remove('selected'));
-    node.element.classList.add('selected');
-    node.element.nodeRef = node;
-  };
-  // Edit on right-click
+  node.element.setAttribute("tabindex", "0");
+  node.element.setAttribute("aria-label", label);
+  node.element.setAttribute("role", "treeitem");
+  node.element.setAttribute("aria-expanded", "false");
+  // Select on click or keyboard (Enter/Space)
+  function selectNode(e) {
+    if (e.type === "click" ||
+        (e.type === "keydown" && (e.key === "Enter" || e.key === " "))) {
+      e.stopPropagation();
+      document.querySelectorAll('.node.selected').forEach(el=>el.classList.remove('selected'));
+      node.element.classList.add('selected');
+      node.element.nodeRef = node;
+      node.element.focus();
+    }
+  }
+  node.element.onclick = selectNode;
+  node.element.onkeydown = selectNode;
+  // Edit on right-click or Shift+F10/ContextMenu key
   node.element.oncontextmenu = e => {
     e.preventDefault();
     showEditNodeDialog(node);
   };
+  node.element.addEventListener('keydown', e => {
+    if (e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) {
+      e.preventDefault();
+      showEditNodeDialog(node);
+    }
+  });
   node.childrenContainer = document.createElement("div");
   node.childrenContainer.className = "children";
+  node.childrenContainer.setAttribute("role", "group");
   node.element.appendChild(node.childrenContainer);
   return node;
 }
 
 /**
  * Show dialog to add a new child under selected or to edit existing
+ * Accessible: trap focus, close on Escape, announce via aria-live
  */
 function showAddNodeDialog() {
   nodeUnderEdit = null;
@@ -203,15 +223,26 @@ function showAddNodeDialog() {
   document.getElementById('modalTitle').textContent = "Add node";
   modalConfirmButton.textContent = "Add";
   nodeTextInput.value = "";
-  setTimeout(()=>nodeTextInput.focus(),0);
+  nodeDialogModal.setAttribute("aria-hidden", "false");
+  nodeDialogModal.focus();
+  setTimeout(() => nodeTextInput.focus(), 0);
+
+  // Trap focus inside modal
+  trapModalFocus(nodeDialogModal);
+
+  // Announce opening modal
+  announce("Dialog opened: Add node");
 }
 function hideAddNodeDialog() {
   nodeDialogModal.style.display = "none";
+  nodeDialogModal.setAttribute("aria-hidden", "true");
   nodeTextInput.value = "";
+  removeModalFocusTrap(nodeDialogModal);
+  announce("Dialog closed.");
 }
 
 /**
- * Show dialog to edit an existing node
+ * Show dialog to edit an existing node (same a11y as add)
  */
 function showEditNodeDialog(node) {
   nodeUnderEdit = node;
@@ -219,7 +250,61 @@ function showEditNodeDialog(node) {
   document.getElementById('modalTitle').textContent = "Edit node";
   modalConfirmButton.textContent = "Save";
   nodeTextInput.value = node.label;
-  setTimeout(()=>nodeTextInput.focus(),0);
+  nodeDialogModal.setAttribute("aria-hidden", "false");
+  nodeDialogModal.focus();
+  setTimeout(() => nodeTextInput.focus(), 0);
+  trapModalFocus(nodeDialogModal);
+  announce(`Dialog opened: Edit node ${node.label}`);
+}
+
+// Trap focus inside modal (tab loop)
+function trapModalFocus(modal) {
+  function focusTrap(e) {
+    const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const focusables = modal.querySelectorAll(FOCUSABLE);
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.key === "Tab") {
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    } else if (e.key === "Escape") {
+      hideAddNodeDialog();
+    }
+  }
+  modal.addEventListener("keydown", focusTrap);
+  modal._focusTrap = focusTrap;
+}
+// Remove focus trap on modal close
+function removeModalFocusTrap(modal) {
+  if (modal._focusTrap) {
+    modal.removeEventListener("keydown", modal._focusTrap);
+    delete modal._focusTrap;
+  }
+}
+
+// Announce messages for screen readers
+function announce(message) {
+  let live = document.getElementById('a11y-live');
+  if (!live) {
+    live = document.createElement('div');
+    live.id = 'a11y-live';
+    live.setAttribute('aria-live', 'polite');
+    live.setAttribute('role', 'status');
+    live.style.position = 'absolute';
+    live.style.left = '-9999px';
+    document.body.appendChild(live);
+  }
+  live.textContent = message;
 }
 
 /**
@@ -296,51 +381,71 @@ function exitSimulationMode() {
 
 /**
  * Render simulation UI: breadcrumb, choices, default first select
+ * Accessible: focus management, choices focusable and selectable by keyboard
  */
 function renderSimulationView(node) {
   breadcrumbContainer.innerHTML = "";
-  simulationHistory.forEach((n,i)=>{ 
+  simulationHistory.forEach((n, i) => {
     const item = document.createElement('div'),
           span = document.createElement('span'),
           btn  = document.createElement('button');
     item.className = 'breadcrumb-item';
     span.textContent = n.label;
     btn.textContent = 'Go';
-    btn.onclick = ()=> {
-      simulationHistory = simulationHistory.slice(0,i+1);
+    btn.onclick = () => {
+      simulationHistory = simulationHistory.slice(0, i + 1);
       simulationFuture = [];
       renderSimulationView(n);
       displayToast(`Moved to "${n.label}"`);
     };
-    item.append(span,btn);
+    btn.setAttribute("aria-label", `Go to ${n.label}`);
+    item.append(span, btn);
     breadcrumbContainer.appendChild(item);
   });
 
   simulationTextElement.textContent = `You are at: "${node.label}"`;
+  announce(`You are at: ${node.label}`);
   simulationOptionsContainer.innerHTML = "";
   selectedSimulationNode = null;
 
   if (node.children.length) {
-    node.children.forEach(child=>{
-      const choice = document.createElement("p");
+    node.children.forEach((child, idx) => {
+      const choice = document.createElement("button");
       choice.textContent = child.label;
       choice.className = "simulation-choice";
-      choice.onclick = ()=> {
-        document.querySelectorAll(".simulation-choice.selected").forEach(el=>el.classList.remove("selected"));
+      choice.setAttribute("tabindex", "0");
+      choice.setAttribute("role", "option");
+      choice.setAttribute("aria-label", child.label);
+      choice.onclick = () => {
+        document.querySelectorAll(".simulation-choice.selected").forEach(el => el.classList.remove("selected"));
         choice.classList.add("selected");
         selectedSimulationNode = child;
+        choice.focus();
+        announce(`${child.label} selected`);
       };
+      choice.onkeydown = e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          choice.click();
+        } else if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+          e.preventDefault();
+          if (choice.nextElementSibling) choice.nextElementSibling.focus();
+        } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+          e.preventDefault();
+          if (choice.previousElementSibling) choice.previousElementSibling.focus();
+        }
+      };
+      if (idx === 0) {
+        // Default to first choice
+        choice.classList.add('selected');
+        selectedSimulationNode = node.children[0];
+        setTimeout(() => choice.focus(), 0);
+      }
       simulationOptionsContainer.appendChild(choice);
     });
-    // Default to first choice
-    const first = simulationOptionsContainer.querySelector('.simulation-choice');
-    if (first) {
-      first.classList.add('selected');
-      selectedSimulationNode = node.children[0];
-    }
   }
 
-  simulationBackButton.style.display = simulationHistory.length<=1 ? 'none' : '';
+  simulationBackButton.style.display = simulationHistory.length <= 1 ? 'none' : '';
   simulationGoButton.style.display = node.children.length ? '' : 'none';
 }
 
