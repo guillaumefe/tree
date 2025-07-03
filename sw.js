@@ -8,6 +8,7 @@ const ASSETS = [
   './favicon.ico',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  'https://cdn.sheetjs.com/xlsx-0.19.0/package/dist/xlsx.full.min.js'
 ];
 
 // Install: Cache essential files, with error handling
