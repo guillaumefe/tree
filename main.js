@@ -607,70 +607,41 @@ function handleFileImport(event) {
  * rebuilds the tree “block by block” exactly as it was exported.
  */
 function buildTreeFromRows(rows) {
-  // 1) Clear current tree, recreate single “Start” root
+  // 1) Clear and recreate root
   treeContainerElement.innerHTML = '';
   rootTreeNode = createNode("Start");
   treeContainerElement.appendChild(rootTreeNode.element);
   rootTreeNode.children = [];
 
-  // 2) Helper to find first non-empty cell index
-  function firstNonEmptyIndex(r) {
-    for (let i = 0; i < r.length; i++) {
-      if (r[i] !== undefined && r[i] !== '') return i;
-    }
-    return -1;
+  // 2) Utility: Normalize and lowercase for reliable comparisons
+  function norm(label) {
+    return normalizeLabel(String(label || '').trim()).toLowerCase();
   }
 
-  // 3) Process rows in “blocks” separated by blank lines
-  let block = [];
-  function processBlock(blockRows) {
-    if (!blockRows.length) return;
-    // Parent row = first row of block
-    const parentRow = blockRows[0];
-    const pDepth    = firstNonEmptyIndex(parentRow);
-    const pLabel    = normalizeLabel(String(parentRow[pDepth]).trim());
-    // Create one new child under root
-    const parentNode = createNode(pLabel);
-    parentNode.parent = rootTreeNode;
-    rootTreeNode.children.push(parentNode);
-    parentNode.parent.childrenContainer.appendChild(parentNode.element);
+  // 3) For every row, follow the path creating or reusing nodes
+  rows.forEach(row => {
+    if (!row || row.every(cell => cell == null || cell === '')) return;
+    let parent = rootTreeNode;
+    for (let d = 0; d < row.length; ++d) {
+      let raw = row[d];
+      if (raw == null || raw === '') continue;
+      let label = normalizeLabel(String(raw).trim());
+      let searchNorm = norm(label);
 
-    // Remaining rows = leaves for this block
-    for (let i = 1; i < blockRows.length; i++) {
-      const row = blockRows[i];
-      // Walk the path from depth+1 onward
-      let current = parentNode;
-      for (let col = pDepth + 1; col < row.length; col++) {
-        const cell = row[col];
-        if (cell === undefined || cell === '') continue;
-        const lbl = normalizeLabel(String(cell).trim());
-        const child = createNode(lbl);
-        child.parent = current;
-        current.children.push(child);
-        current.childrenContainer.appendChild(child.element);
-        current = child;
+      // Try to find the existing child
+      let child = parent.children.find(n => norm(n.label) === searchNorm);
+      if (!child) {
+        child = createNode(label);
+        child.parent = parent;
+        parent.children.push(child);
+        parent.childrenContainer.appendChild(child.element);
       }
-    }
-  }
-
-  rows.forEach(r => {
-    // detect blank row => finish previous block
-    if (!r || r.every(c => c === undefined || c === '')) {
-      processBlock(block);
-      block = [];
-    } else {
-      block.push(r);
+      parent = child;
     }
   });
-  // final block
-  processBlock(block);
 
-  // 4) Persist and notify
   persistTree();
-
-  // Default-select the root node
   document.querySelectorAll('.node.selected').forEach(el => el.classList.remove('selected'));
   rootTreeNode.element.classList.add('selected');
-  
   displayToast("Tree imported");
 }
