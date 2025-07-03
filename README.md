@@ -70,6 +70,92 @@ A Progressive Web App (PWA) for authoring, editing and simulating decision trees
 
 ---
 
+### Installation Options (by Browser/Platform)
+
+### 📱 **Mobile**
+
+#### **Android (Chrome, Edge, Brave, Samsung Internet)**
+- Visit the app in your browser.
+- A banner or custom toast appears (“Install” or “Add to Home Screen”).
+- Or, tap browser menu `⋮` → “Add to Home screen”.
+- Follow system prompts to install.  
+- The app launches from your home screen like a native app.
+
+#### **iOS (Safari)**
+- Open the app in **Safari** (PWA install not supported from Chrome on iOS).
+- Tap the “Share” button → “Add to Home Screen”.
+- Follow the prompt; icon appears on your home screen.
+- Note: No install banner or toast (Apple restriction).
+
+---
+
+### 💻 **Desktop**
+
+#### **Chrome / Edge / Brave (Windows, macOS, Linux)**
+- Open the app in your browser.
+- You may see a browser install icon (usually in the URL bar or as a “+”).
+- Or, a custom “Install” toast appears—click **Install**.
+- Or, open browser menu `⋮` → “Install App…” or “Add to Home Screen”.
+- The app launches in its own window, like a native desktop app.
+
+#### **Firefox / LibreWolf (All Platforms)**
+- **PWA install is *not supported* on desktop Firefox or LibreWolf.**
+- No install banner or toast will appear.
+- You can bookmark the site or pin the tab for easier access.
+- **Mobile Firefox on Android**: “Add to Home screen” is available via browser menu.
+
+#### **Safari (macOS)**
+- Open the app in Safari.
+- Go to File → “Add to Dock…” (macOS Sonoma and later).
+- Not available in older macOS Safari versions.
+
+---
+
+### 📝 **Summary Table**
+
+| Browser / Platform               | Mobile Install                | Desktop Install                | Prompt/Toast      |
+|----------------------------------|-------------------------------|-------------------------------|-------------------|
+| **Chrome (Android)**             | Yes                           | Yes (Chromebook)              | Yes               |
+| **Chrome (Windows/Mac/Linux)**   | N/A                           | Yes                           | Yes               |
+| **Edge (Android)**               | Yes                           | Yes (Windows/macOS/Linux)     | Yes               |
+| **Edge (Windows/Mac/Linux)**     | N/A                           | Yes                           | Yes               |
+| **Brave (Android)**              | Yes                           | Yes                           | Yes               |
+| **Brave (Windows/Mac/Linux)**    | N/A                           | Yes                           | Yes               |
+| **Opera (Android)**              | Yes                           | Yes (GX/desktop)              | Yes               |
+| **Opera (Windows/Mac/Linux)**    | N/A                           | Yes                           | Yes               |
+| **Vivaldi (Android)**            | Yes                           | Yes                           | Yes               |
+| **Vivaldi (Windows/Mac/Linux)**  | N/A                           | Yes                           | Yes               |
+| **Samsung Internet (Android)**   | Yes                           | N/A                           | Yes               |
+| **Safari (iOS)**                 | Yes (Share menu)              | N/A                           | No (manual only)  |
+| **Safari (macOS Sonoma+)**       | N/A                           | Yes ("Add to Dock")           | No (manual only)  |
+| **Safari (older macOS)**         | N/A                           | No                            | No                |
+| **Firefox (Android)**            | Yes (via menu)                | No                            | No                |
+| **Firefox (Windows/Mac/Linux)**  | No                            | No                            | No                |
+| **LibreWolf (All Platforms)**    | No                            | No                            | No                |
+| **ChromeOS**                     | Yes (via Chrome)              | Yes                           | Yes               |
+| **Bromite (Android)**            | Yes                           | N/A                           | Yes               |
+| **Other Android Browsers**       | Sometimes (manual)            | No                            | Sometimes         |
+
+#### **Legend:**
+- **Yes** = Full install PWA support (prompt JS + browser menu)
+- **No** = No PWA install support
+- **N/A** = Browser not available on that platform
+- **(manual only)** = Only via OS or browser menu, no JS prompt
+- **Prompt/Toast** = Shows either native banner or custom JS toast if implemented
+
+**Note:**  
+- *Safari iOS*: Only "Share > Add to Home Screen" (no JS prompt).  
+- *Safari macOS Sonoma*: "Add to Dock" is manual, no JS prompt.  
+- *Firefox/LibreWolf*: No PWA install on desktop.  
+- *Samsung Internet, Bromite*: Full support like Chrome Android.
+
+---
+
+**Tip:**  
+- You can always use the app in your browser with full offline support, even without installation.
+
+---
+
 ## Architecture & Files
 
 ```
