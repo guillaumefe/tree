@@ -163,6 +163,48 @@ function normalizeLabel(txt) {
 }
 
 /**
+ * Enables editing a node via long-press gesture on touch devices,
+ * and prevents "ghost clicks" (unwanted clicks fired after long-press).
+ *
+ * @param {HTMLElement} element - The DOM element to attach the gesture to (typically the node button).
+ * @param {Object} node - The node object associated with the element, used for editing.
+ */
+function enableLongPressEdit(element, node) {
+  let timer = null;
+  let preventClick = false; // Flag to prevent ghost clicks
+
+  // Start the timer on touch start. If the touch lasts 500ms, open the edit dialog.
+  element.addEventListener('touchstart', function(e) {
+    e.stopPropagation();
+    timer = setTimeout(() => {
+      showEditNodeDialog(node);
+      preventClick = true; // Block the next click after a long-press
+      setTimeout(() => { preventClick = false; }, 350); // Reset flag after a short delay
+    }, 500); // Long-press duration in milliseconds
+  });
+
+  // Cancel the timer if the touch ends or the finger moves/cancels (no long-press)
+  element.addEventListener('touchend', function(e) {
+    clearTimeout(timer);
+  });
+  element.addEventListener('touchmove', function(e) {
+    clearTimeout(timer);
+  });
+  element.addEventListener('touchcancel', function(e) {
+    clearTimeout(timer);
+  });
+
+  // Prevent the next "click" event if it comes right after a long-press
+  element.addEventListener('click', function(e) {
+    if (preventClick) {
+      e.stopPropagation();
+      e.preventDefault();
+      preventClick = false; // Reset the flag just in case
+    }
+  }, true); // Use capture phase to intercept early
+}
+
+/**
  * Create a new tree node element with click/contextmenu handlers
  * Accessible: node is a button, focusable by keyboard, context menu via keyboard
  */
@@ -201,6 +243,7 @@ function createNode(text) {
     e.stopPropagation();
     showEditNodeDialog(node);
   };
+  enableLongPressEdit(node.element, node);
   node.element.addEventListener('keydown', e => {
     if (e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) {
       e.preventDefault();
