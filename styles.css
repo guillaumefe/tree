@@ -201,11 +201,12 @@ button:hover {
   word-wrap: break-word; /*leagcy support*/
   overflow-wrap: break-word;
   hyphens: auto;
+  color: #222 !important;
 }
 .simulation-choice.selected {
   border-left-color: #4a90e2;
   background: #e9f5ff;
-  color: #1a2a39;
+  color: #1a2a39 !important;
 }
 
 /* ----------------------------------------------------------------------------
