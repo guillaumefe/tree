@@ -11,46 +11,50 @@
   <script src="https://cdn.sheetjs.com/xlsx-0.19.0/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-  <!-- Tutorial cursor indicator -->
-  <div id="tutorial-cursor"></div>
+  <!-- Tutorial cursor indicator, hidden from screen readers -->
+  <div id="tutorial-cursor" aria-hidden="true"></div>
 
   <!-- App Header -->
-  <header>
-    <div class="header-title">Interactive Decision Tree</div>
-    <div class="header-actions">
-      <button onclick="confirmTreeReset()">Reset Tree</button>
-      <button id="startSimButton" onclick="enterSimulationMode()">Start Simulation</button>
-      <button onclick="exportTreeToExcel()">Export to Excel</button>
-      <button onclick="promptFileImport()">Import from Excel</button>
-      <button id="tutorialButton" onclick="beginTutorial()">Tutorial</button>
-      <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none" onchange="handleFileImport(event)" />
-    </div>
+  <header role="banner">
+    <h1 class="header-title" id="main-title">Interactive Decision Tree</h1>
+    <nav aria-label="Main actions">
+      <div class="header-actions" role="menubar">
+        <button role="menuitem" onclick="confirmTreeReset()" id="resetTreeBtn" aria-label="Reset the decision tree">Reset Tree</button>
+        <button role="menuitem" id="startSimButton" onclick="enterSimulationMode()" aria-label="Start simulation mode">Start Simulation</button>
+        <button role="menuitem" onclick="exportTreeToExcel()" aria-label="Export tree to Excel">Export to Excel</button>
+        <button role="menuitem" onclick="promptFileImport()" aria-label="Import tree from Excel">Import from Excel</button>
+        <button role="menuitem" id="tutorialButton" onclick="beginTutorial()" aria-label="Open the tutorial">Tutorial</button>
+        <label for="importFile" id="importFileLabel" class="visually-hidden">Choose Excel file to import</label>
+        <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none" onchange="handleFileImport(event)" aria-labelledby="importFileLabel" />
+      </div>
+    </nav>
   </header>
 
   <!-- Node addition controls -->
-  <section id="controls">
-    <button onclick="showAddNodeDialog()">Add Node</button>
+  <section id="controls" aria-label="Node addition controls">
+    <button onclick="showAddNodeDialog()" aria-label="Add a new node to the decision tree">Add Node</button>
   </section>
 
   <!-- Main decision-tree display -->
-  <section id="tree"></section>
+  <main id="tree" aria-label="Decision tree" tabindex="0"></main>
 
   <!-- Simulation view -->
-  <section id="simulation">
-    <div id="breadcrumb"></div>
-    <div id="simulation-text">Loading...</div>
+  <section id="simulation" aria-label="Simulation mode" tabindex="0">
+    <nav aria-label="Breadcrumb" id="breadcrumb"></nav>
+    <div id="simulation-text" aria-live="polite">Loading...</div>
     <div id="simulation-options"></div>
     <div id="simulation-controls">
-      <button id="simulation-back-button" onclick="navigateBack()">Back</button>
-      <button id="simulation-go-button" onclick="navigateForwardSelection()">Go</button>
+      <button id="simulation-back-button" onclick="navigateBack()" aria-label="Go back to previous node">Back</button>
+      <button id="simulation-go-button" onclick="navigateForwardSelection()" aria-label="Go to the selected node">Go</button>
     </div>
   </section>
 
   <!-- Modal dialog for add/edit node -->
-  <div class="modal" id="nodeDialogModal">
+  <div class="modal" id="nodeDialogModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="nodeTextInput" tabindex="-1">
     <div class="modal-content">
-      <h3 id="modalTitle">Enter node text</h3>
-      <textarea id="nodeTextInput" placeholder="Type here..."></textarea>
+      <h2 id="modalTitle">Enter node text</h2>
+      <label for="nodeTextInput" class="visually-hidden">Node text</label>
+      <textarea id="nodeTextInput" placeholder="Type here..." aria-required="true"></textarea>
       <button id="modalConfirmButton">Add</button>
       <button onclick="hideAddNodeDialog()">Cancel</button>
     </div>
@@ -60,4 +64,3 @@
   <script src="install-toast.js"></script>
 </body>
 </html>
-
