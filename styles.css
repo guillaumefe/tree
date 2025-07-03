@@ -127,6 +127,7 @@ button {
 }
 button:hover {
   background: #357ab8;
+  color: #fff;
 }
 
 /* ----------------------------------------------------------------------------
@@ -204,6 +205,7 @@ button:hover {
 .simulation-choice.selected {
   border-left-color: #4a90e2;
   background: #e9f5ff;
+  color: #1a2a39;
 }
 
 /* ----------------------------------------------------------------------------
