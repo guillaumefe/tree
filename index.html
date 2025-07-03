@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="theme-color" content="#4a90e2">
+  <title>Interactive Decision Tree</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.sheetjs.com/xlsx-0.19.0/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <!-- Tutorial cursor indicator -->
+  <div id="tutorial-cursor"></div>
+
+  <!-- App Header -->
+  <header>
+    <div class="header-title">Interactive Decision Tree</div>
+    <div class="header-actions">
+      <button onclick="confirmTreeReset()">Reset Tree</button>
+      <button id="startSimButton" onclick="enterSimulationMode()">Start Simulation</button>
+      <button onclick="exportTreeToExcel()">Export to Excel</button>
+      <button onclick="promptFileImport()">Import from Excel</button>
+      <button id="tutorialButton" onclick="beginTutorial()">Tutorial</button>
+      <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none" onchange="handleFileImport(event)" />
+    </div>
+  </header>
+
+  <!-- Node addition controls -->
+  <section id="controls">
+    <button onclick="showAddNodeDialog()">Add Node</button>
+  </section>
+
+  <!-- Main decision-tree display -->
+  <section id="tree"></section>
+
+  <!-- Simulation view -->
+  <section id="simulation">
+    <div id="breadcrumb"></div>
+    <div id="simulation-text">Loading...</div>
+    <div id="simulation-options"></div>
+    <div id="simulation-controls">
+      <button id="simulation-back-button" onclick="navigateBack()">Back</button>
+      <button id="simulation-go-button" onclick="navigateForwardSelection()">Go</button>
+    </div>
+  </section>
+
+  <!-- Modal dialog for add/edit node -->
+  <div class="modal" id="nodeDialogModal">
+    <div class="modal-content">
+      <h3 id="modalTitle">Enter node text</h3>
+      <textarea id="nodeTextInput" placeholder="Type here..."></textarea>
+      <button id="modalConfirmButton">Add</button>
+      <button onclick="hideAddNodeDialog()">Cancel</button>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+  <script src="install-toast.js"></script>
+</body>
+</html>
+
